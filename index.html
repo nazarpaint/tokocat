@@ -2021,6 +2021,9 @@
                     <a class="nav-item" onclick="navigateTo('kategori')" data-page="kategori" data-label="Kategori">
                         <i class="fas fa-tags"></i><span class="nav-label"> Kategori</span>
                     </a>
+                    <a class="nav-item" onclick="navigateTo('vendor')" data-page="vendor" data-label="Vendor">
+                        <i class="fas fa-truck"></i><span class="nav-label"> Vendor / Supplier</span>
+                    </a>
                 </div>
                 
                 <div class="nav-section">
@@ -2361,6 +2364,43 @@
                     </div>
                 </div>
                 
+                <!-- ========== VENDOR PAGE ========== -->
+                <div class="page-section" id="page-vendor">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-truck" style="color: var(--primary);"></i> Vendor / Supplier</h3>
+                            <button class="btn btn-primary" onclick="openVendorModal()">
+                                <i class="fas fa-plus"></i> Tambah Vendor
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Nama Vendor</th>
+                                            <th>Alamat</th>
+                                            <th>Telepon</th>
+                                            <th>Email</th>
+                                            <th>Dibuat Pada</th>
+                                            <th>Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="vendorTableBody">
+                                        <tr>
+                                            <td colspan="7" style="text-align: center; padding: 40px;">
+                                                <p style="color: var(--gray-600);">Memuat data...</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
                 <!-- ========== TRANSAKSI PAGE ========== -->
                 <div class="page-section" id="page-transaksi">
                     <div class="card">
@@ -2530,6 +2570,14 @@
                         </div>
                     </div>
                 </div>
+                <div class="form-group">
+                    <label class="form-label">Vendor / Supplier</label>
+                    <div class="custom-select">
+                        <select id="productVendor" tabindex="5">
+                            <option value="">Pilih Vendor</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Stok Minimum</label>
@@ -2659,6 +2707,46 @@
         </div>
     </div>
     
+    <!-- ========== MODAL: Vendor ========== -->
+    <div class="modal-overlay" id="vendorModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="vendorModalTitle">Tambah Vendor</h3>
+                <button class="modal-close" onclick="closeVendorModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="vendorId">
+                <div class="form-group">
+                    <label class="form-label">Nama Vendor *</label>
+                    <input type="text" class="form-control" id="vendorNama" placeholder="Contoh: PT. Cat Jaya" oninput="handleTitleCaseInput(this)" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Alamat</label>
+                    <textarea class="form-control" id="vendorAlamat" rows="2" placeholder="Alamat lengkap vendor"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Telepon</label>
+                        <input type="tel" class="form-control" id="vendorTelepon" placeholder="Contoh: 081234567890">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" id="vendorEmail" placeholder="Contoh: info@catjaya.com">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeVendorModal()">Batal</button>
+                <button class="btn btn-primary" onclick="saveVendor()">
+                    <i class="fas fa-save"></i> Simpan Vendor
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+
+
     <!-- ========== MODAL: Detail Transaksi ========== -->
     <div class="modal-overlay" id="pendingSyncModal">
         <div class="modal">
@@ -2706,6 +2794,7 @@
         let currentUser = null;
         let cart = [];
         let posProducts = []; // Cache produk yang sedang ditampilkan di grid kasir,
+        let vendors = []; // Cache vendor
                                // dipakai addToCart() supaya tidak perlu query ulang ke server tiap klik.
         let currentPage = 'dashboard';
         let transaksiCurrentPage = 1;
@@ -2714,6 +2803,7 @@
         // ============================================
         // OFFLINE MODE — konstanta & state
         // ============================================
+        const OFFLINE_VENDOR_KEY = 'toko_cat_vendor_cache';
         const OFFLINE_PRODUK_KEY = 'toko_cat_produk_cache';
         const OFFLINE_KATEGORI_KEY = 'toko_cat_kategori_cache';
         const OFFLINE_QUEUE_KEY = 'toko_cat_pending_transaksi';
@@ -2841,6 +2931,14 @@
             }
         }
         
+        function getVendorCache() {
+            try {
+                return JSON.parse(localStorage.getItem(OFFLINE_VENDOR_KEY) || '[]');
+            } catch (e) { return []; }
+        }
+        function setVendorCache(data) {
+            try { localStorage.setItem(OFFLINE_VENDOR_KEY, JSON.stringify(data || [])); } catch (e) { console.error('Gagal simpan cache vendor:', e); }
+        }
         // ============================================
         // OFFLINE MODE — modal review transaksi pending
         // ============================================
@@ -3199,6 +3297,10 @@
                 if (!katError && kat) {
                     setKategoriCache(kat);
                 }
+                const { data: ven, error: venError } = await supabaseClient.from('vendors').select('*').order('nama');
+                if (!venError && ven) {
+                    setVendorCache(ven);
+                }
             } catch (e) {
                 console.error('Gagal refresh cache produk:', e);
             }
@@ -3516,6 +3618,7 @@
                 'kasir': 'Kasir / POS',
                 'stok': 'Manajemen Stok',
                 'kategori': 'Kategori',
+                'vendor': 'Manajemen Vendor',
                 'transaksi': 'Rekap Transaksi',
                 'labarugi': 'Laba Rugi'
             };
@@ -3526,6 +3629,7 @@
                 case 'dashboard': loadDashboardData(); break;
                 case 'kasir': initKasirPage(); break;
                 case 'stok': loadProducts(); loadStokLog(); loadKategoriOptions(); break;
+                case 'vendor': loadVendors(); break;
                 case 'kategori': loadKategori(); break;
                 case 'transaksi': loadTransactions(); break;
                 case 'labarugi': loadLabaRugi(); break;
@@ -4432,7 +4536,7 @@
         // ============================================
         // STOK MANAGEMENT
         // ============================================
-        async function loadKategoriOptions() {
+        async function loadKategoriOptions(selectId = 'productKategori') {
             if (!supabaseClient) return;
             const { data } = await supabaseClient.from('kategori').select('*').order('nama');
             const selectStok = document.getElementById('stokFilterKategori');
@@ -4447,7 +4551,26 @@
                     });
                 }
             });
-            updateCustomSelect('stokFilterKategori');
+            updateCustomSelect(selectId);
+        }
+
+        async function loadVendorOptions(selectId = 'productVendor') {
+            if (!supabaseClient) return;
+            const { data } = await supabaseClient.from('vendors').select('*').order('nama');
+            const selectVendor = document.getElementById(selectId);
+            
+            if (!selectVendor || !selectVendor.closest('.custom-select')) return;
+            selectVendor.innerHTML = '<option value="">Pilih Vendor</option>';
+            if (data) {
+                data.forEach(v => {
+                    selectVendor.innerHTML += `<option value="${v.id}">${v.nama}</option>`;
+                });
+            }
+            updateCustomSelect(selectId);
+        }
+
+        async function loadProductOptions() {
+            await loadKategoriOptions('productKategori');
             updateCustomSelect('productKategori');
         }
         
@@ -4458,7 +4581,7 @@
             const kategoriId = document.getElementById('stokFilterKategori')?.value || '';
             const statusFilter = document.getElementById('stokFilterStatus')?.value || '';
             
-            let queryBuilder = supabaseClient.from('produk').select('*, kategori(nama)').order('nama');
+            let queryBuilder = supabaseClient.from('produk').select('*, kategori(nama), vendors(nama)').order('nama');
             
             if (search) queryBuilder = queryBuilder.ilike('nama', `%${search}%`);
             if (kategoriId) queryBuilder = queryBuilder.eq('kategori_id', kategoriId);
@@ -4485,9 +4608,10 @@
                     
                     return `
                         <tr>
-                            <td>${idx + 1}</td>
+                            <td>${idx + 1}</td> 
                             <td><code>${p.kode_barcode || '-'}</code></td>
                             <td><strong>${p.nama}</strong></td>
+                            <td>${p.vendors?.nama || '-'}</td>
                             <td>${p.kategori?.nama || '-'}</td>
                             <td>${formatRupiah(p.harga_beli)}</td>
                             <td>
@@ -4511,7 +4635,7 @@
                     `;
                 }).join('');
             } else {
-                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:40px;">
+                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:40px;">
                     <i class="fas fa-box-open" style="font-size:3rem; opacity:0.2;"></i>
                     <p style="margin-top:12px;">Tidak ada produk</p>
                 </td></tr>`;
@@ -4569,6 +4693,7 @@
                             document.getElementById('productBarcode').value = data.kode_barcode || '';
                             document.getElementById('productNama').value = data.nama;
                             document.getElementById('productKategori').value = data.kategori_id || '';
+                            document.getElementById('productVendor').value = data.vendor_id || '';
                             document.getElementById('productSatuan').value = data.satuan;
                             document.getElementById('productStokMin').value = data.stok_minimum;
                             document.getElementById('productHargaBeli').value = data.harga_beli ? new Intl.NumberFormat('id-ID').format(data.harga_beli) : '';
@@ -4584,6 +4709,7 @@
                 document.getElementById('productBarcode').value = '';
                 document.getElementById('productNama').value = '';
                 document.getElementById('productKategori').value = '';
+                document.getElementById('productVendor').value = '';
                 document.getElementById('productSatuan').value = 'kg';
                 document.getElementById('productStokMin').value = '5';
                 document.getElementById('productHargaBeli').value = '';
@@ -4595,7 +4721,8 @@
                 if (saveBtnReset) { saveBtnReset.disabled = false; saveBtnReset.style.opacity = '1'; saveBtnReset.style.cursor = 'pointer'; }
             }
             
-            loadKategoriOptions();
+            loadKategoriOptions('productKategori');
+            loadVendorOptions('productVendor');
             updateCustomSelect('productSatuan');
             // initCustomSelects(); // Re-init selects in modal
 
@@ -4637,6 +4764,7 @@
                 kode_barcode: document.getElementById('productBarcode').value || null,
                 nama: document.getElementById('productNama').value,
                 kategori_id: document.getElementById('productKategori').value || null,
+                vendor_id: document.getElementById('productVendor').value || null,
                 satuan: document.getElementById('productSatuan').value,
                 stok_minimum: parseFloat(document.getElementById('productStokMin').value) || 5,
                 harga_beli: unformatRupiah(document.getElementById('productHargaBeli').value),
@@ -4949,7 +5077,7 @@
 
                 showToast('Kategori berhasil disimpan!', 'success');
                 closeKategoriModal();
-                loadKategori();
+                loadKategori(); // Refresh kategori table
                 loadKategoriOptions();
             } catch (error) {
                 showToast('Error: ' + error.message, 'error');
@@ -4974,6 +5102,120 @@
             }
         }
         
+        // ============================================
+        // VENDOR MANAGEMENT
+        // ============================================
+        async function loadVendors() {
+            if (!supabaseClient) return;
+            
+            const { data } = await supabaseClient.from('vendors').select('*').order('nama');
+            
+            const tbody = document.getElementById('vendorTableBody');
+            if (data && data.length > 0) {
+                tbody.innerHTML = data.map((v, idx) => `
+                    <tr>
+                        <td>${idx + 1}</td>
+                        <td><strong>${v.nama}</strong></td>
+                        <td>${v.alamat || '-'}</td>
+                        <td>${v.telepon || '-'}</td>
+                        <td>${v.email || '-'}</td>
+                        <td>${formatDate(v.created_at)}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline" onclick="editVendor('${v.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteVendor('${v.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:40px;">
+                    <i class="fas fa-truck" style="font-size:3rem; opacity:0.2;"></i>
+                    <p style="margin-top:12px;">Belum ada vendor</p>
+                </td></tr>`;
+            }
+        }
+
+        function openVendorModal(vendorId = null) {
+            document.getElementById('vendorModal').classList.add('active');
+            document.getElementById('vendorModalTitle').textContent = vendorId ? 'Edit Vendor' : 'Tambah Vendor Baru';
+            
+            if (vendorId) {
+                supabaseClient.from('vendors').select('*').eq('id', vendorId).single()
+                    .then(({ data }) => {
+                        if (data) {
+                            document.getElementById('vendorId').value = data.id;
+                            document.getElementById('vendorNama').value = data.nama;
+                            document.getElementById('vendorAlamat').value = data.alamat || '';
+                            document.getElementById('vendorTelepon').value = data.telepon || '';
+                            document.getElementById('vendorEmail').value = data.email || '';
+                        }
+                    });
+            } else {
+                document.getElementById('vendorId').value = '';
+                document.getElementById('vendorNama').value = '';
+                document.getElementById('vendorAlamat').value = '';
+                document.getElementById('vendorTelepon').value = '';
+                document.getElementById('vendorEmail').value = '';
+            }
+        }
+
+        function closeVendorModal() {
+            document.getElementById('vendorModal').classList.remove('active');
+        }
+
+        async function saveVendor() {
+            const id = document.getElementById('vendorId').value;
+            const data = {
+                nama: document.getElementById('vendorNama').value.trim(),
+                alamat: document.getElementById('vendorAlamat').value.trim() || null,
+                telepon: document.getElementById('vendorTelepon').value.trim() || null,
+                email: document.getElementById('vendorEmail').value.trim() || null,
+            };
+            
+            if (!data.nama) {
+                showToast('Nama vendor harus diisi!', 'warning');
+                return;
+            }
+            
+            showLoading();
+            try {
+                if (id) {
+                    await supabaseClient.from('vendors').update(data).eq('id', id);
+                    showToast('Vendor berhasil diupdate!', 'success');
+                } else {
+                    await supabaseClient.from('vendors').insert(data);
+                    showToast('Vendor berhasil ditambahkan!', 'success');
+                }
+                closeVendorModal();
+                loadVendors();
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function editVendor(id) {
+            openVendorModal(id);
+        }
+
+        async function deleteVendor(id) {
+            if (!confirm('Yakin ingin menghapus vendor ini?')) return;
+            showLoading();
+            try {
+                await supabaseClient.from('vendors').delete().eq('id', id);
+                showToast('Vendor berhasil dihapus!', 'success');
+                loadVendors();
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
         // ============================================
         // TRANSAKSI
         // ============================================
@@ -5334,6 +5576,11 @@
                 event.preventDefault();
                 navigateTo('stok');
             }
+            // Ctrl+V = Vendor
+            if (event.ctrlKey && event.key === 'v') {
+                event.preventDefault();
+                navigateTo('vendor');
+            }
             // Ctrl+T = Transaksi
             if (event.ctrlKey && event.key === 't') {
                 event.preventDefault();
@@ -5349,7 +5596,7 @@
         // Modal hanya bisa ditutup lewat tombol "Batal" atau tombol X.
         
         console.log('🎨 Toko Cat Kiloan - SPA Ready!');
-        console.log('📋 Shortcuts: Ctrl+K=F1=Kasir | Ctrl+D=Dashboard | Ctrl+S=Stok | Ctrl+T=Transaksi | Esc=Tutup Modal');
+        console.log('📋 Shortcuts: Ctrl+K=F1=Kasir | Ctrl+D=Dashboard | Ctrl+S=Stok | Ctrl+V=Vendor | Ctrl+T=Transaksi | Esc=Tutup Modal');
     </script>
 </body>
 </html>
