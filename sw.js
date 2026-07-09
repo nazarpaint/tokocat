@@ -1,19 +1,8 @@
 // sw.js - Service Worker dengan strategi Network First
-const CACHE_NAME = 'toko-cat-v1';
+const CACHE_NAME = 'toko-cat-v2';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
-    '/kasir.html',
-    '/stok.html',
-    '/transaksi.html',
-    '/laba-rugi.html',
-    '/css/style.css',
-    '/js/app.js',
-    '/js/supabase.js',
-    '/js/kasir.js',
-    '/js/stok.js',
-    '/js/transaksi.js',
-    '/js/laba-rugi.js',
     '/manifest.json'
 ];
 
@@ -24,7 +13,9 @@ self.addEventListener('install', (event) => {
         caches.open(CACHE_NAME)
             .then((cache) => {
                 console.log('[SW] Caching assets');
-                return cache.addAll(ASSETS_TO_CACHE);
+                return Promise.allSettled(
+                    ASSETS_TO_CACHE.map((asset) => cache.add(asset))
+                );
             })
             .then(() => {
                 console.log('[SW] Skip waiting');
@@ -55,15 +46,22 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     // Hanya handle GET request
     if (event.request.method !== 'GET') return;
-    
-    // Skip Supabase API calls (biarkan network only)
-    if (event.request.url.includes('supabase.co')) {
+
+    const requestUrl = new URL(event.request.url);
+
+    // Skip cross-origin requests and Supabase API calls (biarkan network/browser default)
+    if (requestUrl.origin !== self.location.origin || requestUrl.hostname.includes('supabase.co')) {
         return;
     }
 
     event.respondWith(
         fetch(event.request)
             .then((networkResponse) => {
+                // Jangan cache response gagal/opaque agar cache tidak terisi error page
+                if (!networkResponse || !networkResponse.ok) {
+                    return networkResponse;
+                }
+
                 // Update cache dengan response terbaru
                 const responseClone = networkResponse.clone();
                 caches.open(CACHE_NAME)
@@ -80,10 +78,12 @@ self.addEventListener('fetch', (event) => {
                         if (cachedResponse) {
                             return cachedResponse;
                         }
-                        // Return halaman offline jika tidak ada di cache
-                        if (event.request.headers.get('accept').includes('text/html')) {
-                            return caches.match('/offline.html');
+                        // Return halaman utama untuk navigasi HTML supaya SPA tetap terbuka offline
+                        const accept = event.request.headers.get('accept') || '';
+                        if (accept.includes('text/html')) {
+                            return caches.match('/index.html');
                         }
+                        return new Response('', { status: 504, statusText: 'Offline' });
                     });
             })
     );

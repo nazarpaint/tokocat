@@ -2962,6 +2962,9 @@
                 .maybeSingle();
 
             if (error || !existing) return null;
+            if (existing.status !== 'selesai') {
+                throw new Error(`Invoice ${entry.no_invoice} sudah ada dengan status ${existing.status || 'tidak diketahui'}. Periksa rekap sebelum retry agar stok tidak salah.`);
+            }
 
             const { count, error: detailCountError } = await supabaseClient
                 .from('transaksi_detail')
@@ -5277,9 +5280,10 @@
             const totalPendapatan = data?.reduce((s, d) => s + (d.total_pendapatan || 0), 0) || 0;
             const totalModal = data?.reduce((s, d) => s + (d.total_modal || 0), 0) || 0;
             const totalLabaBersih = data?.reduce((s, d) => s + (d.total_laba_bersih || 0), 0) || (totalPendapatan - totalModal);
-            // Zakat dihitung 2,5% dari laba bersih yang positif saja (hari/periode rugi
-            // tidak mengurangi kewajiban zakat dari periode lain, jadi tidak dijumlah negatif).
-            const totalZakat = Math.max(0, totalLabaBersih) * ZAKAT_PERCENTAGE / 100;
+            // Zakat dihitung 2,5% dari laba bersih yang positif saja per baris/periode;
+            // periode rugi tidak boleh mengurangi zakat dari periode yang untung.
+            const totalLabaPositifUntukZakat = data?.reduce((s, d) => s + Math.max(0, d.total_laba_bersih || 0), 0) || Math.max(0, totalLabaBersih);
+            const totalZakat = totalLabaPositifUntukZakat * ZAKAT_PERCENTAGE / 100;
             
             document.getElementById('lrPendapatan').textContent = formatRupiah(totalPendapatan);
             document.getElementById('lrModal').textContent = formatRupiah(totalModal);
