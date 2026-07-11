@@ -171,6 +171,46 @@ body.no-scroll .main { overflow: hidden; height: 100vh; }
   #menuItemKasir { display: none !important; }
 }
 
+/* Tampilan HP: kartu statistik ditumpuk vertikal (full width), bukan 3 kolom sempit */
+@media (max-width: 768px) {
+  #rekap-penjualan .rekap-top-row,
+  #rekap-stok .rekap-top-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  #rekap-penjualan .stats-grid.stats-grid-compact,
+  #rekap-stok .stats-grid.stats-grid-compact {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  #rekap-penjualan .stats-grid-compact .stat-card,
+  #rekap-stok .stats-grid-compact .stat-card {
+    padding: 18px 20px;
+    border-left-width: 6px;
+    border-radius: 14px;
+  }
+  #rekap-penjualan .stats-grid-compact .stat-label,
+  #rekap-stok .stats-grid-compact .stat-label {
+    font-size: 12px;
+    letter-spacing: 0.6px;
+  }
+  #rekap-penjualan .stats-grid-compact .stat-value,
+  #rekap-stok .stats-grid-compact .stat-value {
+    font-size: 26px;
+    margin-top: 8px;
+    white-space: normal;
+  }
+  #rekap-penjualan .rekap-top-row .filters,
+  #rekap-stok .rekap-top-row .filters {
+    width: 100%;
+  }
+  #rekap-penjualan .rekap-top-row .filters .form-group,
+  #rekap-stok .rekap-top-row .filters .form-group {
+    flex: 1 1 45%;
+    min-width: 0;
+  }
+}
+
 /* Tampilan HP: Rekap Penjualan - sembunyikan tombol Export & Back, pakai back HP saja */
 @media (max-width: 768px) {
   #rekap-penjualan #btnExportSalesReport,
