@@ -210,6 +210,35 @@ body.no-scroll .main { overflow: hidden; height: 100vh; }
     flex: 1 1 45%;
     min-width: 0;
   }
+  #rekap-penjualan .btn-reset,
+  #rekap-stok .btn-reset {
+    display: none !important;
+  }
+}
+
+/* Tampilan HP: Dashboard - sembunyikan grafik & panel stok menipis, tumpuk 5 kartu statistik */
+@media (max-width: 768px) {
+  #dashboard .dashboard-main-row {
+    display: none !important;
+  }
+  #dashboard .stats-grid.dashboard-stats-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px;
+  }
+  #dashboard .dashboard-stats-grid .stat-card {
+    padding: 18px 20px;
+    border-left-width: 6px;
+    border-radius: 14px;
+  }
+  #dashboard .dashboard-stats-grid .stat-label {
+    font-size: 12px;
+    letter-spacing: 0.6px;
+  }
+  #dashboard .dashboard-stats-grid .stat-value {
+    font-size: 26px;
+    margin-top: 8px;
+    white-space: normal;
+  }
 }
 
 /* Tampilan HP: Rekap Penjualan - sembunyikan tombol Export & Back, pakai back HP saja */
@@ -742,7 +771,7 @@ tr:hover { background: #f9fafb; }
         <div class="stat-label">Total Produk</div>
         <div class="stat-value" id="dash-total-products">0</div>
       </div>
-      <div class="stat-card danger" style="cursor: pointer" onclick="goToInputStok()" title="Input Stok Masuk">
+      <div class="stat-card danger" style="cursor: pointer" onclick="handleLowStockCardClick()" title="Lihat Stok Menipis">
         <div class="stat-label">Stok Menipis</div>
         <div class="stat-value" id="dash-low-stock">0</div>
       </div>
@@ -1296,6 +1325,18 @@ tr:hover { background: #f9fafb; }
   </div>
 </div>
 
+<div class="modal" id="lowStockModal">
+  <div class="modal-content" style="max-width: 500px">
+    <div class="modal-header">
+      <h3 class="modal-title"><svg class="warning-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;  margin-right: 6px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3.05h16.94a2 2 0 0 0 1.71-3.05L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg> Tabel Stok Menipis</h3>
+      <button class="modal-close" onclick="closeModal('lowStockModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+    </div>
+    <div id="lowStockListModal"></div>
+  </div>
+</div>
+
+
+
 <script>
 // ============ ICONS (SVG) ============
 const ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path><path d="M15 5l4 4"></path></svg>';
@@ -1498,6 +1539,15 @@ function showToast(msg, type='success') {
 }
 function openModal(id) { document.getElementById(id).classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+function handleLowStockCardClick() {
+  if (window.matchMedia('(max-width: 768px)').matches) {
+    const source = document.getElementById('lowStockList');
+    document.getElementById('lowStockListModal').innerHTML = source ? source.innerHTML : '';
+    openModal('lowStockModal');
+  } else {
+    goToInputStok();
+  }
+}
 
 // ============ DASHBOARD ============
 function renderDashboard() {
