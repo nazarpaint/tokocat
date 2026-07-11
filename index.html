@@ -192,7 +192,7 @@ body.no-scroll .main { overflow: hidden; height: 100vh; }
   #rekap-penjualan .stats-grid-compact .stat-card,
   #rekap-stok .stats-grid-compact .stat-card {
     padding: 18px 20px;
-    border-left-width: 6px;
+    border-left-width: 9px;
     border-radius: 14px;
   }
   #rekap-penjualan .stats-grid-compact .stat-label,
@@ -239,8 +239,22 @@ body.no-scroll .main { overflow: hidden; height: 100vh; }
     flex-direction: column;
     justify-content: center;
     padding: 18px 20px;
-    border-left-width: 6px;
+    border-left-width: 9px;
     border-radius: 14px;
+  }
+  #dashboard .dashboard-stats-grid .stat-icon,
+  #rekap-penjualan .stats-grid-compact .stat-icon,
+  #rekap-stok .stats-grid-compact .stat-icon {
+    width: 40px;
+    height: 40px;
+    right: 18px;
+    opacity: 0.55;
+  }
+  #dashboard .dashboard-stats-grid .stat-icon svg,
+  #rekap-penjualan .stats-grid-compact .stat-icon svg,
+  #rekap-stok .stats-grid-compact .stat-icon svg {
+    width: 100%;
+    height: 100%;
   }
   #dashboard .dashboard-stats-grid .stat-label {
     font-size: 12px;
@@ -774,22 +788,27 @@ tr:hover { background: #f9fafb; }
       <div class="stat-card success" style="cursor: pointer" onclick="goToRekapPenjualan()" title="Lihat Rekap Penjualan">
         <div class="stat-label">Penjualan Hari Ini</div>
         <div class="stat-value" id="dash-sales-today">Rp 0</div>
+        <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></div>
       </div>
       <div class="stat-card info" style="cursor: pointer" onclick="goToKasir()" title="Buka Kasir">
         <div class="stat-label">Transaksi Hari Ini</div>
         <div class="stat-value" id="dash-transactions-today">0</div>
+        <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg></div>
       </div>
       <div class="stat-card warning" style="cursor: pointer" onclick="goToProduk()" title="Lihat Manajemen Produk">
         <div class="stat-label">Total Produk</div>
         <div class="stat-value" id="dash-total-products">0</div>
+        <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41L13.42 20.59a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg></div>
       </div>
       <div class="stat-card danger" style="cursor: pointer" onclick="handleLowStockCardClick()" title="Lihat Stok Menipis">
         <div class="stat-label">Stok Menipis</div>
         <div class="stat-value" id="dash-low-stock">0</div>
+        <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3.05h16.94a2 2 0 0 0 1.71-3.05L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Total Stok (Nilai)</div>
         <div class="stat-value" id="dash-stock-value">Rp 0</div>
+        <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"></path><path d="M1 3h22v5H1z"></path><line x1="10" y1="12" x2="14" y2="12"></line></svg></div>
       </div>
     </div>
 
@@ -908,14 +927,17 @@ tr:hover { background: #f9fafb; }
           <div class="stat-card success">
             <div class="stat-label">Total Transaksi</div>
             <div class="stat-value" id="salesTotalTrans">0</div>
+            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"></path><line x1="8" y1="6" x2="16" y2="6"></line><line x1="8" y1="10" x2="16" y2="10"></line><line x1="8" y1="14" x2="16" y2="14"></line><line x1="8" y1="18" x2="13" y2="18"></line></svg></div>
           </div>
           <div class="stat-card info">
             <div class="stat-label">Total Penjualan</div>
             <div class="stat-value" id="salesTotalAmount">Rp 0</div>
+            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></div>
           </div>
           <div class="stat-card warning">
             <div class="stat-label">Total Item Terjual</div>
             <div class="stat-value" id="salesTotalItems">0</div>
+            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41L13.42 20.59a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg></div>
           </div>
         </div>
 
