@@ -1025,12 +1025,12 @@ tr:hover { background: #f9fafb; }
           <div class="cart-summary" style="border-top: none; padding-top: 0">
             <div class="summary-row"><span>Subtotal:</span><span id="cartSubtotal">Rp 0</span></div>
             <div class="summary-row"><span>Diskon:</span>
-              <input type="number" id="cartDiscount" value="0" min="0" style="width: 100px; padding: 3px 8px; border: 1px solid var(--border); border-radius: 4px" onchange="updateCartSummary()">
+              <input type="text" inputmode="numeric" id="cartDiscount" value="0" style="width: 100px; padding: 3px 8px; border: 1px solid var(--border); border-radius: 4px" oninput="formatMoneyInput(this); updateCartSummary()">
             </div>
             <div class="summary-row total"><span>TOTAL:</span><span id="cartTotal">Rp 0</span></div>
             <div class="form-group" style="margin-top: 15px">
               <label class="form-label">Uang Bayar</label>
-              <input type="number" id="cartPayment" tabindex="2" class="form-control" placeholder="Masukkan jumlah bayar" oninput="updateCartSummary()">
+              <input type="text" inputmode="numeric" id="cartPayment" tabindex="2" class="form-control" placeholder="Masukkan jumlah bayar" oninput="formatMoneyInput(this); updateCartSummary()">
             </div>
             <div class="summary-row"><span>Kembalian:</span><span id="cartChange" style="font-weight: 700; color: var(--success)">Rp 0</span></div>
             <div class="quick-cash-grid">
@@ -1165,7 +1165,7 @@ tr:hover { background: #f9fafb; }
           </div>
           <div class="form-group">
             <label class="form-label" id="stockBuyPriceLabel">Harga Beli per Kg</label>
-            <input type="number" id="stockBuyPrice" class="form-control" min="0" required oninput="calcStockTotal()">
+            <input type="text" inputmode="numeric" id="stockBuyPrice" class="form-control" required oninput="formatMoneyInput(this); calcStockTotal()">
           </div>
           <div class="form-group">
             <label class="form-label">Total Harga</label>
@@ -1367,7 +1367,7 @@ tr:hover { background: #f9fafb; }
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Nama Toko</label>
-          <input type="text" id="setStoreName" class="form-control" value="Toko Cat Kiloan Berkah">
+          <input type="text" id="setStoreName" class="form-control" value="Toko Cat Kiloan Berkah" onblur="applyTitleCase(this)">
         </div>
         <div class="form-group">
           <label class="form-label">Alamat</label>
@@ -1419,13 +1419,13 @@ tr:hover { background: #f9fafb; }
       <input type="hidden" id="productId">
       <div class="form-group">
         <label class="form-label">Nama Produk</label>
-        <input type="text" id="productName" class="form-control" required>
+        <input type="text" id="productName" class="form-control" required onblur="applyTitleCase(this)">
       </div>
       <div class="form-group">
         <label class="form-label">Kategori</label>
         <div style="display: flex; gap: 8px">
           <select id="productCategory" class="form-control" required style="flex: 1" onchange="updateProductUnitLabels()"></select>
-          <input type="text" id="newCategoryInput" class="form-control" placeholder="Nama kategori baru" style="flex: 1; display: none" oninput="updateSaveCategoryState()" onkeydown="handleCategoryInputKey(event)">
+          <input type="text" id="newCategoryInput" class="form-control" placeholder="Nama kategori baru" style="flex: 1; display: none" oninput="updateSaveCategoryState()" onkeydown="handleCategoryInputKey(event)" onblur="applyTitleCase(this)">
           <button type="button" id="categoryActionBtn" class="btn btn-secondary btn-sm" onclick="toggleAddCategory()" style="white-space: nowrap">+ Kategori</button>
           <button type="button" id="cancelAddCategoryBtn" class="btn btn-secondary btn-sm" onclick="cancelAddCategory()" style="white-space: nowrap; display: none" title="Batal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
         </div>
@@ -1438,11 +1438,11 @@ tr:hover { background: #f9fafb; }
       </div>
       <div class="form-group">
         <label class="form-label" id="productBuyPriceLabel">Harga Beli / Kg</label>
-        <input type="number" id="productBuyPrice" class="form-control" min="0" required oninput="updateProductMarginPreview()">
+        <input type="text" inputmode="numeric" id="productBuyPrice" class="form-control" required oninput="formatMoneyInput(this); updateProductMarginPreview()">
       </div>
       <div class="form-group">
         <label class="form-label" id="productSellPriceLabel">Harga Jual / Kg</label>
-        <input type="number" id="productSellPrice" class="form-control" min="0" required oninput="updateProductMarginPreview()">
+        <input type="text" inputmode="numeric" id="productSellPrice" class="form-control" required oninput="formatMoneyInput(this); updateProductMarginPreview()">
       </div>
       <div class="form-group">
         <label class="form-label">Margin</label>
@@ -1463,7 +1463,7 @@ tr:hover { background: #f9fafb; }
       <input type="hidden" id="vendorId">
       <div class="form-group">
         <label class="form-label">Nama Vendor</label>
-        <input type="text" id="vendorName" class="form-control" required>
+        <input type="text" id="vendorName" class="form-control" required onblur="applyTitleCase(this)">
       </div>
       <div class="form-group">
         <label class="form-label">Kontak / No. HP</label>
@@ -1714,6 +1714,34 @@ function goToInputStok() {
 
 // ============ UTILITIES ============
 function formatRp(n) { return 'Rp ' + (n || 0).toLocaleString('id-ID'); }
+
+// ===== Title Case & Rupiah Input Helpers =====
+function toTitleCase(str) {
+  return (str || '').toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase());
+}
+function applyTitleCase(el) {
+  if (!el) return;
+  el.value = toTitleCase(el.value);
+}
+function formatMoneyInput(el) {
+  if (!el) return;
+  const posFromEnd = el.value.length - el.selectionStart;
+  const digits = el.value.replace(/[^0-9]/g, '');
+  el.value = digits ? Number(digits).toLocaleString('id-ID') : '';
+  const newPos = Math.max(0, el.value.length - posFromEnd);
+  try { el.setSelectionRange(newPos, newPos); } catch(e) {}
+}
+function moneyValue(id) {
+  const el = document.getElementById(id);
+  if (!el) return 0;
+  const digits = (el.value || '').replace(/[^0-9]/g, '');
+  return digits ? parseInt(digits, 10) : 0;
+}
+function setMoneyValue(id, value) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.value = (value || value === 0) ? Number(value).toLocaleString('id-ID') : '';
+}
 function formatDate(d) { return new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }); }
 function showToast(msg, type='success') {
   const t = document.createElement('div');
@@ -2044,7 +2072,7 @@ function changeQty(i, delta) {
 }
 
 function setQuickPayment(amount) {
-  document.getElementById('cartPayment').value = amount;
+  setMoneyValue('cartPayment', amount);
   updateCartSummary();
 }
 
@@ -2056,13 +2084,13 @@ function setQty(i, val) {
 }
 
 function removeFromCart(i) { cart.splice(i, 1); renderCart(); }
-function clearCart() { cart = []; document.getElementById('cartDiscount').value = 0; document.getElementById('cartPayment').value = ''; renderCart(); }
+function clearCart() { cart = []; document.getElementById('cartDiscount').value = '0'; document.getElementById('cartPayment').value = ''; renderCart(); }
 
 function updateCartSummary() {
   const subtotal = cart.reduce((s, i) => s + i.qty * i.price, 0);
-  const discount = +document.getElementById('cartDiscount').value || 0;
+  const discount = moneyValue('cartDiscount');
   const total = subtotal - discount;
-  const payment = +document.getElementById('cartPayment').value || 0;
+  const payment = moneyValue('cartPayment');
   const change = payment - total;
   document.getElementById('cartSubtotal').textContent = formatRp(subtotal);
   document.getElementById('cartTotal').textContent = formatRp(total);
@@ -2079,9 +2107,9 @@ function updateCartSummary() {
 function processPayment() {
   if (cart.length === 0) { showToast('Keranjang kosong!', 'error'); return; }
   const subtotal = cart.reduce((s, i) => s + i.qty * i.price, 0);
-  const discount = +document.getElementById('cartDiscount').value || 0;
+  const discount = moneyValue('cartDiscount');
   const total = subtotal - discount;
-  const payment = +document.getElementById('cartPayment').value || 0;
+  const payment = moneyValue('cartPayment');
   if (payment < total) { showToast('Uang bayar kurang!', 'error'); return; }
   
   const sale = {
@@ -2340,7 +2368,7 @@ function updateStockUnitLabels() {
 
 function calcStockTotal() {
   const qty = +document.getElementById('stockQty').value || 0;
-  const price = +document.getElementById('stockBuyPrice').value || 0;
+  const price = moneyValue('stockBuyPrice');
   document.getElementById('stockTotal').value = formatRp(qty * price);
 }
 
@@ -2348,7 +2376,7 @@ function saveStockIn(e) {
   e.preventDefault();
   const productId = +document.getElementById('stockProduct').value;
   const qty = Math.round(+document.getElementById('stockQty').value);
-  const buyPrice = +document.getElementById('stockBuyPrice').value;
+  const buyPrice = moneyValue('stockBuyPrice');
   const vendorId = +document.getElementById('stockVendor').value;
 
   if (!vendorId) { showToast('Pilih vendor!', 'error'); return; }
@@ -2591,7 +2619,7 @@ function handleCategoryInputKey(event) {
 
 function addCategory() {
   const input = document.getElementById('newCategoryInput');
-  const name = input.value.trim();
+  const name = toTitleCase(input.value.trim());
   if (!name) { showToast('Nama kategori tidak boleh kosong', 'error'); return; }
   if (data.categories.some(c => c.toLowerCase() === name.toLowerCase())) {
     showToast('Kategori sudah ada', 'error');
@@ -2617,8 +2645,8 @@ function openProductModal(id = null) {
     document.getElementById('productName').value = p.name;
     renderCategoryOptions(p.category);
     document.getElementById('productVendor').value = p.vendorId || '';
-    document.getElementById('productBuyPrice').value = p.buyPrice;
-    document.getElementById('productSellPrice').value = p.sellPrice;
+    setMoneyValue('productBuyPrice', p.buyPrice);
+    setMoneyValue('productSellPrice', p.sellPrice);
   } else {
     document.getElementById('productName').value = '';
     renderCategoryOptions();
@@ -2639,8 +2667,8 @@ function updateProductUnitLabels() {
 }
 
 function updateProductMarginPreview() {
-  const buyPrice = +document.getElementById('productBuyPrice').value || 0;
-  const sellPrice = +document.getElementById('productSellPrice').value || 0;
+  const buyPrice = moneyValue('productBuyPrice');
+  const sellPrice = moneyValue('productSellPrice');
   const el = document.getElementById('productMarginPreview');
   const sellInput = document.getElementById('productSellPrice');
   const saveBtn = document.getElementById('productSaveBtn');
@@ -2657,8 +2685,8 @@ function updateProductMarginPreview() {
 
 function saveProduct(e) {
   e.preventDefault();
-  const buyPrice = +document.getElementById('productBuyPrice').value;
-  const sellPrice = +document.getElementById('productSellPrice').value;
+  const buyPrice = moneyValue('productBuyPrice');
+  const sellPrice = moneyValue('productSellPrice');
   if (sellPrice < buyPrice) {
     showToast('Harga jual tidak boleh lebih rendah dari harga beli!', 'error');
     return;
@@ -2666,7 +2694,7 @@ function saveProduct(e) {
   const id = document.getElementById('productId').value;
   const vendorId = document.getElementById('productVendor').value ? +document.getElementById('productVendor').value : null;
   const productData = {
-    name: document.getElementById('productName').value,
+    name: toTitleCase(document.getElementById('productName').value),
     category: document.getElementById('productCategory').value,
     vendorId,
     vendorName: vendorId ? data.vendors.find(v => v.id === vendorId)?.name : null,
@@ -2741,7 +2769,7 @@ function saveVendor(e) {
   e.preventDefault();
   const id = document.getElementById('vendorId').value;
   const vendorData = {
-    name: document.getElementById('vendorName').value,
+    name: toTitleCase(document.getElementById('vendorName').value),
     contact: document.getElementById('vendorContact').value,
     address: document.getElementById('vendorAddress').value
   };
@@ -2810,7 +2838,7 @@ function loadSettings() {
 }
 
 function saveSettings() {
-  data.settings.storeName = document.getElementById('setStoreName').value;
+  data.settings.storeName = toTitleCase(document.getElementById('setStoreName').value);
   data.settings.storeAddress = document.getElementById('setStoreAddress').value;
   data.settings.storePhone = document.getElementById('setStorePhone').value;
   data.settings.storeFooter = document.getElementById('setStoreFooter').value;
