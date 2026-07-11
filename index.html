@@ -150,6 +150,22 @@ body { background: var(--bg); color: var(--text); min-height: 100vh; }
 body.no-scroll { overflow: hidden; height: 100vh; }
 body.no-scroll .main { overflow: hidden; height: 100vh; }
 
+/* PWA Install Button */
+#pwaInstallBtn {
+  position: fixed; right: 20px; bottom: 20px; z-index: 500;
+  background: var(--primary); color: #000; border: none;
+  font-weight: 800; font-size: 14px; padding: 13px 20px;
+  border-radius: 30px; cursor: pointer; display: none; align-items: center; gap: 8px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.25); transition: transform 0.15s, background 0.2s;
+}
+#pwaInstallBtn.show { display: flex; }
+#pwaInstallBtn:hover { background: var(--secondary); }
+#pwaInstallBtn:active { transform: translateY(1px); }
+#pwaInstallBtn svg { width: 18px; height: 18px; flex-shrink: 0; }
+@media (max-width: 640px) {
+  #pwaInstallBtn { right: 14px; bottom: 14px; padding: 12px 16px; font-size: 13px; }
+}
+
 /* Dashboard — fill remaining height so bottom edge matches Rekap Penjualan */
 #dashboard.active { height: 100%; display: flex; flex-direction: column; }
 #dashboard .page-header { flex: 0 0 auto; }
@@ -606,6 +622,11 @@ tr:hover { background: #f9fafb; }
 </style>
 </head>
 <body>
+
+<button id="pwaInstallBtn" class="no-print" type="button">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+  Install App
+</button>
 
 <div class="menu-dropdown-panel no-print" id="menuDropdown">
 
@@ -2949,6 +2970,56 @@ function validateDataMutation(before, after) {
         .then((reg) => console.log('[SW] Terdaftar:', reg.scope))
         .catch((err) => console.error('[SW] Gagal daftar:', err));
     });
+  }
+
+  // --- Tombol Install PWA Manual ---
+  let deferredInstallPrompt = null;
+  const installBtn = document.getElementById('pwaInstallBtn');
+
+  function isRunningStandalone() {
+    return window.matchMedia('(display-mode: standalone)').matches
+      || window.navigator.standalone === true; // iOS Safari
+  }
+
+  // Sembunyikan tombol kalau sudah terinstall / berjalan sebagai app
+  if (isRunningStandalone()) {
+    installBtn.classList.remove('show');
+  }
+
+  // Chrome/Edge/Android: event ini muncul kalau app memenuhi syarat installable
+  window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    if (!isRunningStandalone()) {
+      installBtn.classList.add('show');
+    }
+  });
+
+  installBtn.addEventListener('click', async () => {
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      const { outcome } = await deferredInstallPrompt.userChoice;
+      console.log('[PWA] Hasil install:', outcome);
+      deferredInstallPrompt = null;
+      installBtn.classList.remove('show');
+    } else if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
+      // iOS Safari tidak mendukung beforeinstallprompt -> tampilkan petunjuk manual
+      alert('Untuk install di iPhone/iPad:\n\n1. Ketuk tombol Share (kotak dengan panah ke atas)\n2. Pilih "Add to Home Screen" / "Tambah ke Layar Utama"\n3. Ketuk "Add"');
+    } else {
+      alert('Aplikasi sudah terinstall, atau browser ini belum mendukung install otomatis. Coba buka menu browser dan cari opsi "Install App" / "Add to Home Screen".');
+    }
+  });
+
+  // Setelah berhasil diinstall, sembunyikan tombol
+  window.addEventListener('appinstalled', () => {
+    installBtn.classList.remove('show');
+    deferredInstallPrompt = null;
+    console.log('[PWA] Aplikasi berhasil diinstall');
+  });
+
+  // iOS: tombol tetap ditampilkan (untuk munculkan petunjuk manual) kalau belum standalone
+  if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !isRunningStandalone()) {
+    installBtn.classList.add('show');
   }
 </script>
 
