@@ -3,8 +3,8 @@ const APP_SHELL = [
   '/tokocat/',
   '/tokocat/index.html',
   '/tokocat/manifest.json',
-  '/tokocat/icons/icon-192.png',
-  '/tokocat/icons/icon-512.png'
+  '/tokocat/icon-192.png',
+  '/tokocat/icon-512.png'
 ];
 
 // Install: cache app shell
