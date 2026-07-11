@@ -166,6 +166,11 @@ body.no-scroll .main { overflow: hidden; height: 100vh; }
   #pwaInstallBtn { right: 14px; bottom: 14px; padding: 12px 16px; font-size: 13px; }
 }
 
+/* Tampilan HP: sembunyikan menu Kasir */
+@media (max-width: 768px) {
+  #menuItemKasir { display: none !important; }
+}
+
 /* Dashboard — fill remaining height so bottom edge matches Rekap Penjualan */
 #dashboard.active { height: 100%; display: flex; flex-direction: column; }
 #dashboard .page-header { flex: 0 0 auto; }
@@ -635,7 +640,7 @@ tr:hover { background: #f9fafb; }
   </div>
   <ul class="menu">
     <li class="active" onclick="showPage('dashboard', this)"><span class="menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span> <span class="menu-label">Dashboard</span></li>
-    <li onclick="showPage('kasir', this)"><span class="menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg></span> <span class="menu-label">Kasir</span></li>
+    <li id="menuItemKasir" onclick="showPage('kasir', this)"><span class="menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg></span> <span class="menu-label">Kasir</span></li>
     <li onclick="showPage('rekap-penjualan', this)"><span class="menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span> <span class="menu-label">Rekap Penjualan</span></li>
     <li onclick="showPage('input-stok', this)"><span class="menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></span> <span class="menu-label">Input Stok</span></li>
     <li onclick="showPage('rekap-stok', this)"><span class="menu-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v13H3V8"></path><path d="M1 3h22v5H1z"></path><line x1="10" y1="12" x2="14" y2="12"></line></svg></span> <span class="menu-label">Rekap Input Stok</span></li>
@@ -1346,6 +1351,11 @@ function loadSampleData() {
 
 // ============ NAVIGATION ============
 function showPage(pageId, el) {
+  // Halaman Kasir tidak tersedia di tampilan HP
+  if (pageId === 'kasir' && window.innerWidth <= 768) {
+    pageId = 'dashboard';
+    el = null;
+  }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById(pageId).classList.add('active');
   document.querySelectorAll('.menu li').forEach(m => m.classList.remove('active'));
