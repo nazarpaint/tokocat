@@ -267,6 +267,21 @@ body.no-scroll .main { overflow: hidden; height: 100vh; }
   }
 }
 
+/* Tampilan HP: border tabel & filter tanggal dipertebal, hanya berlaku di mobile */
+@media (max-width: 768px) {
+  .table-wrapper {
+    border-width: 2px;
+    border-color: #000;
+  }
+  .filters .form-control,
+  .filters .custom-select-trigger,
+  .rekap-top-row .filters .form-control,
+  .rekap-top-row .filters .custom-select-trigger {
+    border-width: 2px;
+    border-color: #000;
+  }
+}
+
 /* Tampilan HP: Rekap Penjualan - sembunyikan tombol Export & Back, pakai back HP saja */
 @media (max-width: 768px) {
   #rekap-penjualan #btnExportSalesReport,
