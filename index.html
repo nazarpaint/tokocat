@@ -323,6 +323,91 @@ body.no-scroll .main { overflow: hidden; height: 100vh; }
     background: linear-gradient(135deg, #6ee7b7, var(--success)) !important;
     border-left-color: #000 !important;
   }
+
+  /* Manajemen Vendor: sembunyikan tombol Tambah Vendor & kolom Aksi */
+  #vendor #btnAddVendor,
+  #vendor table th:last-child,
+  #vendor table td:last-child {
+    display: none !important;
+  }
+
+  /* Laba Rugi: card memenuhi tinggi sampai batas bawah seperti Dashboard */
+  body:has(#laba-rugi.active) {
+    overflow: hidden;
+    height: 100vh;
+  }
+  body:has(#laba-rugi.active) .main {
+    overflow: hidden;
+    height: 100vh;
+  }
+  #laba-rugi.active {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  #laba-rugi .page-header { flex: 0 0 auto; }
+  #laba-rugi .card {
+    flex: 1 1 auto;
+    min-height: 0;
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Laba Rugi: Dari Tanggal & Sampai Tanggal sejajar, Periode di bawahnya */
+  #laba-rugi .filters {
+    flex: 0 0 auto;
+  }
+  #laba-rugi .filters .form-group:nth-child(1) {
+    order: 3;
+    flex: 1 1 100%;
+  }
+  #laba-rugi .filters .form-group:nth-child(2) {
+    order: 1;
+    flex: 1 1 45%;
+    min-width: 0;
+  }
+  #laba-rugi .filters .form-group:nth-child(3) {
+    order: 2;
+    flex: 1 1 45%;
+    min-width: 0;
+  }
+
+  /* Laba Rugi: kartu statistik memenuhi sisa tinggi, tumpuk vertikal */
+  #laba-rugi .stats-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    grid-template-columns: none;
+    gap: 14px;
+    margin-bottom: 0;
+  }
+  #laba-rugi .stats-grid .stat-card {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 18px 20px;
+    border-left-width: 9px;
+    border-radius: 14px;
+  }
+  #laba-rugi .stats-grid .stat-label {
+    font-size: 12px;
+    letter-spacing: 0.6px;
+  }
+  #laba-rugi .stats-grid .stat-value {
+    font-size: 26px;
+    margin-top: 8px;
+    white-space: normal;
+  }
+}
+
+/* Manajemen Vendor: kolom No hanya tampil di mobile */
+@media (min-width: 769px) {
+  #vendor .vendor-no-col {
+    display: none !important;
+  }
 }
 
 /* Tampilan HP: Rekap Penjualan - sembunyikan tombol Export & Back, pakai back HP saja */
@@ -1194,14 +1279,14 @@ tr:hover { background: #f9fafb; }
           <p class="page-subtitle">Kelola daftar vendor/supplier</p>
         </div>
       </div>
-      <button class="btn btn-primary" onclick="openVendorModal()"><svg class="plus-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;  margin-right: 6px"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Tambah Vendor</button>
+      <button class="btn btn-primary" id="btnAddVendor" onclick="openVendorModal()"><svg class="plus-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px;  margin-right: 6px"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Tambah Vendor</button>
     </div>
 
     <div class="card">
       <div class="table-wrapper">
         <table>
           <thead>
-            <tr><th>Nama Vendor</th><th>Kontak</th><th>Alamat</th><th>Total Transaksi</th><th>Aksi</th></tr>
+            <tr><th class="vendor-no-col">No</th><th>Nama Vendor</th><th>Kontak</th><th>Alamat</th><th>Total Transaksi</th><th>Aksi</th></tr>
           </thead>
           <tbody id="vendorsBody"></tbody>
         </table>
@@ -2615,13 +2700,14 @@ function deleteProduct(id) {
 function renderVendors() {
   const body = document.getElementById('vendorsBody');
   if (data.vendors.length === 0) {
-    body.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 20px; color: var(--text-light)">Belum ada vendor</td></tr>';
+    body.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px; color: var(--text-light)">Belum ada vendor</td></tr>';
     return;
   }
-  body.innerHTML = data.vendors.map(v => {
+  body.innerHTML = data.vendors.map((v, vIdx) => {
     const transCount = data.stockIn.filter(s => s.vendorId === v.id).length;
     return `
       <tr>
+        <td class="vendor-no-col">${vIdx + 1}</td>
         <td><strong>${v.name}</strong></td>
         <td>${v.contact || '-'}</td>
         <td>${v.address || '-'}</td>
