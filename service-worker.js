@@ -1,4 +1,4 @@
-const CACHE_NAME = 'paintstore-cache-v1';
+const CACHE_NAME = 'paintstore-cache-v1.0.1';
 const APP_SHELL = [
   '/tokocat/',
   '/tokocat/index.html',
