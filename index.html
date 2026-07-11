@@ -296,15 +296,17 @@ body.no-scroll .main { overflow: hidden; height: 100vh; }
     display: none !important;
   }
 
-  /* Manajemen Produk: sembunyikan kolom Kategori, Vendor, Margin, Aksi */
+  /* Manajemen Produk: sembunyikan kolom Barcode, Kategori, Vendor, Margin, Aksi (sisakan Nama, Harga Beli, Harga Jual) */
   #produk table.table-centered th:nth-child(2),
   #produk table.table-centered td:nth-child(2),
   #produk table.table-centered th:nth-child(3),
   #produk table.table-centered td:nth-child(3),
-  #produk table.table-centered th:nth-child(6),
-  #produk table.table-centered td:nth-child(6),
+  #produk table.table-centered th:nth-child(4),
+  #produk table.table-centered td:nth-child(4),
   #produk table.table-centered th:nth-child(7),
-  #produk table.table-centered td:nth-child(7) {
+  #produk table.table-centered td:nth-child(7),
+  #produk table.table-centered th:nth-child(8),
+  #produk table.table-centered td:nth-child(8) {
     display: none !important;
   }
 
@@ -406,6 +408,14 @@ body.no-scroll .main { overflow: hidden; height: 100vh; }
 /* Manajemen Vendor: kolom No hanya tampil di mobile */
 @media (min-width: 769px) {
   #vendor .vendor-no-col {
+    display: none !important;
+  }
+}
+
+/* Manajemen Vendor: sembunyikan kolom Aksi khusus di mobile */
+@media (max-width: 768px) {
+  #vendor table th:nth-child(6),
+  #vendor table td:nth-child(6) {
     display: none !important;
   }
 }
@@ -1255,12 +1265,12 @@ tr:hover { background: #f9fafb; }
 
     <div class="card">
       <div class="search-box">
-        <input type="text" id="productSearch" class="form-control" placeholder=" Cari produk..." oninput="productsPage = 1; renderProducts()">
+        <input type="text" id="productSearch" class="form-control" placeholder=" Cari nama produk atau barcode..." oninput="productsPage = 1; renderProducts()">
       </div>
       <div class="table-wrapper">
         <table class="table-centered">
           <thead>
-            <tr><th>Nama Produk</th><th>Kategori</th><th>Vendor</th><th>Harga Beli</th><th>Harga Jual</th><th>Margin</th><th>Aksi</th></tr>
+            <tr><th>Nama Produk</th><th>Barcode</th><th>Kategori</th><th>Vendor</th><th>Harga Beli</th><th>Harga Jual</th><th>Margin</th><th>Aksi</th></tr>
           </thead>
           <tbody id="productsBody"></tbody>
         </table>
@@ -1367,7 +1377,7 @@ tr:hover { background: #f9fafb; }
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Nama Toko</label>
-          <input type="text" id="setStoreName" class="form-control" value="Toko Cat Kiloan Berkah" onblur="applyTitleCase(this)">
+          <input type="text" id="setStoreName" class="form-control" value="Toko Cat Kiloan Berkah" oninput="applyTitleCase(this)">
         </div>
         <div class="form-group">
           <label class="form-label">Alamat</label>
@@ -1419,36 +1429,40 @@ tr:hover { background: #f9fafb; }
       <input type="hidden" id="productId">
       <div class="form-group">
         <label class="form-label">Nama Produk</label>
-        <input type="text" id="productName" class="form-control" required onblur="applyTitleCase(this)">
+        <input type="text" id="productName" class="form-control" required tabindex="1" oninput="applyTitleCase(this)">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Barcode</label>
+        <input type="text" id="productBarcode" class="form-control" placeholder="Scan atau ketik barcode (opsional)" tabindex="2" autocomplete="off">
       </div>
       <div class="form-group">
         <label class="form-label">Kategori</label>
         <div style="display: flex; gap: 8px">
-          <select id="productCategory" class="form-control" required style="flex: 1" onchange="updateProductUnitLabels()"></select>
-          <input type="text" id="newCategoryInput" class="form-control" placeholder="Nama kategori baru" style="flex: 1; display: none" oninput="updateSaveCategoryState()" onkeydown="handleCategoryInputKey(event)" onblur="applyTitleCase(this)">
-          <button type="button" id="categoryActionBtn" class="btn btn-secondary btn-sm" onclick="toggleAddCategory()" style="white-space: nowrap">+ Kategori</button>
-          <button type="button" id="cancelAddCategoryBtn" class="btn btn-secondary btn-sm" onclick="cancelAddCategory()" style="white-space: nowrap; display: none" title="Batal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+          <select id="productCategory" class="form-control" required style="flex: 1" tabindex="3" onchange="updateProductUnitLabels()"></select>
+          <input type="text" id="newCategoryInput" class="form-control" placeholder="Nama kategori baru" style="flex: 1; display: none" tabindex="-1" oninput="applyTitleCase(this); updateSaveCategoryState()" onkeydown="handleCategoryInputKey(event)">
+          <button type="button" id="categoryActionBtn" class="btn btn-secondary btn-sm" tabindex="-1" onclick="toggleAddCategory()" style="white-space: nowrap">+ Kategori</button>
+          <button type="button" id="cancelAddCategoryBtn" class="btn btn-secondary btn-sm" tabindex="-1" onclick="cancelAddCategory()" style="white-space: nowrap; display: none" title="Batal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
         </div>
       </div>
       <div class="form-group">
         <label class="form-label">Vendor Terkait</label>
-        <select id="productVendor" class="form-control">
+        <select id="productVendor" class="form-control" tabindex="4">
           <option value="">-- Non-Vendor --</option>
         </select>
       </div>
       <div class="form-group">
         <label class="form-label" id="productBuyPriceLabel">Harga Beli / Kg</label>
-        <input type="text" inputmode="numeric" id="productBuyPrice" class="form-control" required oninput="formatMoneyInput(this); updateProductMarginPreview()">
+        <input type="text" inputmode="numeric" id="productBuyPrice" class="form-control" required tabindex="5" oninput="formatMoneyInput(this); updateProductMarginPreview()">
       </div>
       <div class="form-group">
         <label class="form-label" id="productSellPriceLabel">Harga Jual / Kg</label>
-        <input type="text" inputmode="numeric" id="productSellPrice" class="form-control" required oninput="formatMoneyInput(this); updateProductMarginPreview()">
+        <input type="text" inputmode="numeric" id="productSellPrice" class="form-control" required tabindex="6" oninput="formatMoneyInput(this); updateProductMarginPreview()">
       </div>
       <div class="form-group">
         <label class="form-label">Margin</label>
-        <input type="text" id="productMarginPreview" class="form-control" readonly style="background: #f3f4f6; font-weight: 700">
+        <input type="text" id="productMarginPreview" class="form-control" readonly tabindex="-1" style="background: #f3f4f6; font-weight: 700">
       </div>
-      <button type="submit" id="productSaveBtn" class="btn btn-success"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;margin-right:6px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"></path><path d="M17 21v-8H7v8"></path><path d="M7 3v5h8"></path></svg> Simpan</button>
+      <button type="submit" id="productSaveBtn" class="btn btn-success" tabindex="7"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;margin-right:6px"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"></path><path d="M17 21v-8H7v8"></path><path d="M7 3v5h8"></path></svg> Simpan</button>
     </form>
   </div>
 </div>
@@ -1463,7 +1477,7 @@ tr:hover { background: #f9fafb; }
       <input type="hidden" id="vendorId">
       <div class="form-group">
         <label class="form-label">Nama Vendor</label>
-        <input type="text" id="vendorName" class="form-control" required onblur="applyTitleCase(this)">
+        <input type="text" id="vendorName" class="form-control" required oninput="applyTitleCase(this)">
       </div>
       <div class="form-group">
         <label class="form-label">Kontak / No. HP</label>
@@ -1721,7 +1735,10 @@ function toTitleCase(str) {
 }
 function applyTitleCase(el) {
   if (!el) return;
+  const start = el.selectionStart;
+  const end = el.selectionEnd;
   el.value = toTitleCase(el.value);
+  try { el.setSelectionRange(start, end); } catch(e) {}
 }
 function formatMoneyInput(el) {
   if (!el) return;
@@ -1868,20 +1885,31 @@ function getProductAvatar(p) {
   return `<div class="product-avatar placeholder">${icon}</div>`;
 }
 
-// Cari produk berdasarkan nama (scan barcode / ketik manual lalu Enter atau klik tombol cari)
+// Cari produk berdasarkan barcode (persis) atau nama (scan barcode / ketik manual lalu Enter atau klik tombol cari)
 function searchAndAddProduct() {
   const input = document.getElementById('kasirSearch');
   const term = (input.value || '').trim().toLowerCase();
   if (!term) return;
 
-  const matches = data.products.filter(p => p.name.toLowerCase().includes(term));
+  // Prioritaskan kecocokan barcode persis (hasil scan alat barcode)
+  const exactBarcode = data.products.find(p => p.barcode && p.barcode.toLowerCase() === term);
+  if (exactBarcode) {
+    if (exactBarcode.stock <= 0) { showToast('Stok produk habis', 'error'); return; }
+    addToCart(exactBarcode.id);
+    input.value = '';
+    hideKasirSearchResults();
+    input.focus();
+    return;
+  }
+
+  const matches = data.products.filter(p => p.name.toLowerCase().includes(term) || (p.barcode && p.barcode.toLowerCase().includes(term)));
 
   if (matches.length === 0) {
     showToast('Produk tidak ditemukan', 'error');
     return;
   }
   if (matches.length > 1) {
-    // Coba cari yang namanya persis sama dulu (mis. hasil scan barcode)
+    // Coba cari yang namanya persis sama dulu (mis. hasil scan barcode yang isinya sama dengan nama)
     const exact = matches.find(p => p.name.toLowerCase() === term);
     if (exact) {
       addToCart(exact.id);
@@ -1924,7 +1952,7 @@ function renderKasirSearchResults() {
     return;
   }
 
-  const matches = data.products.filter(p => p.name.toLowerCase().includes(term));
+  const matches = data.products.filter(p => p.name.toLowerCase().includes(term) || (p.barcode && p.barcode.toLowerCase().includes(term)));
 
   if (matches.length === 0) {
     box.innerHTML = '<div class="kasir-search-results-empty">Produk tidak ditemukan</div>';
@@ -1940,7 +1968,7 @@ function renderKasirSearchResults() {
       <div class="kasir-search-result-item${out ? ' out' : ''}" data-index="${i}" data-id="${p.id}" onclick="${out ? '' : `selectKasirSearchResult(${p.id})`}">
         <div>
           <div class="kasir-search-result-name">${p.name}</div>
-          <div class="kasir-search-result-meta">${p.category} • Stok: ${p.stock} ${unit}${out ? ' (habis)' : ''}</div>
+          <div class="kasir-search-result-meta">${p.category} • Stok: ${p.stock} ${unit}${out ? ' (habis)' : ''}${p.barcode ? ' • ' + p.barcode : ''}</div>
         </div>
         <div class="kasir-search-result-price">${formatRp(p.sellPrice)}</div>
       </div>`;
@@ -2478,11 +2506,11 @@ let productsPage = 1;
 
 function renderProducts() {
   const search = (document.getElementById('productSearch')?.value || '').toLowerCase();
-  const filtered = data.products.filter(p => p.name.toLowerCase().includes(search));
+  const filtered = data.products.filter(p => p.name.toLowerCase().includes(search) || (p.barcode && p.barcode.toLowerCase().includes(search)));
   const body = document.getElementById('productsBody');
   const pagination = document.getElementById('productsPagination');
   if (filtered.length === 0) {
-    body.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: var(--text-light)">Tidak ada produk</td></tr>';
+    body.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px; color: var(--text-light)">Tidak ada produk</td></tr>';
     if (pagination) pagination.innerHTML = '';
     return;
   }
@@ -2498,6 +2526,7 @@ function renderProducts() {
     return `
       <tr>
         <td><strong>${p.name}</strong></td>
+        <td>${p.barcode ? p.barcode : '<span style="color: var(--text-light)">-</span>'}</td>
         <td><span class="badge badge-info badge-kategori">${p.category}</span></td>
         <td>${p.vendorId ? `<span class="badge badge-warning"><svg class="factory-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;  margin-right: 4px"><line x1="3" y1="21" x2="21" y2="21"></line><path d="M7 21V7a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v14"></path><line x1="9" y1="9" x2="9" y2="11"></line><line x1="9" y1="15" x2="9" y2="17"></line><line x1="15" y1="9" x2="15" y2="11"></line><line x1="15" y1="15" x2="15" y2="17"></line><line x1="6" y1="7" x2="6" y2="4"></line><line x1="18" y1="7" x2="18" y2="4"></line></svg> ${p.vendorName || data.vendors.find(v => v.id === p.vendorId)?.name || '-'}</span>` : `<span class="badge"><svg class="person-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 16px; height: 16px;  margin-right: 4px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg> Non-Vendor</span>`}</td>
         <td>${formatRp(p.buyPrice)}</td>
@@ -2511,7 +2540,7 @@ function renderProducts() {
     `;
   }).join('') + Array(Math.max(0, PRODUCTS_PAGE_SIZE - pageItems.length)).fill(
     `<tr class="filler-row">
-      <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+      <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
       <td>
         <button class="btn btn-warning btn-sm" style="visibility:hidden">${ICON_EDIT}</button>
         <button class="btn btn-danger btn-sm" style="visibility:hidden">${ICON_DELETE}</button>
@@ -2643,12 +2672,14 @@ function openProductModal(id = null) {
   if (id) {
     const p = data.products.find(x => x.id === id);
     document.getElementById('productName').value = p.name;
+    document.getElementById('productBarcode').value = p.barcode || '';
     renderCategoryOptions(p.category);
     document.getElementById('productVendor').value = p.vendorId || '';
     setMoneyValue('productBuyPrice', p.buyPrice);
     setMoneyValue('productSellPrice', p.sellPrice);
   } else {
     document.getElementById('productName').value = '';
+    document.getElementById('productBarcode').value = '';
     renderCategoryOptions();
     document.getElementById('productVendor').value = '';
     document.getElementById('productBuyPrice').value = '';
@@ -2692,9 +2723,18 @@ function saveProduct(e) {
     return;
   }
   const id = document.getElementById('productId').value;
+  const barcode = document.getElementById('productBarcode').value.trim();
+  if (barcode) {
+    const dup = data.products.find(p => p.barcode && p.barcode === barcode && p.id !== +id);
+    if (dup) {
+      showToast(`Barcode sudah dipakai oleh produk "${dup.name}"`, 'error');
+      return;
+    }
+  }
   const vendorId = document.getElementById('productVendor').value ? +document.getElementById('productVendor').value : null;
   const productData = {
     name: toTitleCase(document.getElementById('productName').value),
+    barcode: barcode || null,
     category: document.getElementById('productCategory').value,
     vendorId,
     vendorName: vendorId ? data.vendors.find(v => v.id === vendorId)?.name : null,
@@ -2922,6 +2962,7 @@ function renderAll() {
 function enhanceSelect(select) {
   if (select.dataset.customized) return;
   select.dataset.customized = '1';
+  const originalTabIndex = select.hasAttribute('tabindex') ? select.getAttribute('tabindex') : null;
 
   const wrapper = document.createElement('div');
   wrapper.className = 'custom-select-wrapper';
@@ -2934,6 +2975,7 @@ function enhanceSelect(select) {
   trigger.type = 'button';
   trigger.className = 'custom-select-trigger';
   trigger.innerHTML = '<span class="custom-select-value"></span><span class="custom-select-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px"><polyline points="6 9 12 15 18 9"></polyline></svg></span>';
+  if (originalTabIndex !== null) trigger.tabIndex = originalTabIndex;
   wrapper.appendChild(trigger);
 
   const panel = document.createElement('div');
@@ -2992,6 +3034,29 @@ function enhanceSelect(select) {
     e.stopPropagation();
     if (select.disabled) return;
     wrapper.classList.contains('open') ? closePanel() : openPanel();
+  });
+
+  // Navigasi keyboard: panah atas/bawah untuk ganti pilihan (seperti <select> native),
+  // Enter/Space untuk buka-tutup panel, Escape untuk menutup panel.
+  trigger.addEventListener('keydown', (e) => {
+    if (select.disabled) return;
+    const options = Array.from(select.options).filter(o => !o.disabled);
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (options.length === 0) return;
+      let idx = options.findIndex(o => o.value === select.value);
+      if (e.key === 'ArrowDown') {
+        idx = idx < options.length - 1 ? idx + 1 : options.length - 1;
+      } else {
+        idx = idx > 0 ? idx - 1 : 0;
+      }
+      select.value = options[idx].value;
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+    } else if (e.key === 'Escape') {
+      closePanel();
+    } else if (e.key === 'Tab') {
+      closePanel();
+    }
   });
 
   // Sinkronkan label saat value di-set lewat JS (mis. select.value = '...')
